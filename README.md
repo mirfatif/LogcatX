@@ -3,7 +3,7 @@ Filter Android log based on pid, uid, package name, or process name.
 
 It runs a DEX process on Android device which reads directly from logging daemon, not through `logcat` command.
 
-Tested on stock Android 8-15.
+Tested on stock Android 8-16.
 
 ```
 ~$ adb push logcatx /data/local/tmp/
@@ -16,12 +16,14 @@ You can define a convenient wrapper function:
 
 logcatx () { 
   if [ $# -gt 0 ]; then
-    adb $ADB_OPTS shell -t "/data/local/tmp/logcatx $(printf '"%s" ' "$@")";
+    adb $ADB_OPTS shell -t "exec /data/local/tmp/logcatx $(printf '"%s" ' "$@")"
   else
-    adb $ADB_OPTS shell -t /data/local/tmp/logcatx;
+    adb $ADB_OPTS shell -t "exec /data/local/tmp/logcatx"
   fi
 }
 ```
+
+Or use the complete bash completion file: [logcatx.bash](https://github.com/mirfatif/LogcatX/blob/master/logcatx.bash)
 
 Now simply run `logcatx` with required options. Optionally pass options to `adb`, e.g. a device id:
 ```
@@ -51,7 +53,7 @@ Logd:
   -t, --tail=<int>  Print only the most recent given number of lines (default:
                     1)
   -b, --buffers=(main|radio|events|system|crash|stats|security|kernel)
-                    Log buffers, comma-separated list (default: main)
+                    Log buffers, comma-separated list (default: main,crash)
 
 Output:
   -c, --color=(never|always|terminal)
@@ -60,6 +62,7 @@ Output:
                            Log format, comma-separated list (default:
                            ts,uid,pid,buf,prio,tag,msg)
   -dt, --date              Include date in timestamp
+  -ms, --millis            Include milliseconds in timestamp
   -tf, --ts-format=<text>  Timestamp format (default: HH:mm:ss)
   -tw, --tag-width=<int>   Tag's max number of characters (default: 23)
   -w, --width=<int>        Max number of characters in a line
